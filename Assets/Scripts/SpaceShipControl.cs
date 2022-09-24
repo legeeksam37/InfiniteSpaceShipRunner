@@ -16,7 +16,8 @@ public class SpaceShipControl : MonoBehaviour
   private float currentSpeed = 0;
   private ParticleSystem Flame1;
   private ParticleSystem Flame2;
-
+  public float fuelConsumption;
+  
 
   private bool bAccelerate;
   
@@ -26,6 +27,7 @@ public class SpaceShipControl : MonoBehaviour
     void Start()
     {
         transform.position = new Vector3(0 ,MIN_Y,4);
+        
         Flame1 = GameObject.Find("Reactor1").GetComponent<ParticleSystem>();
         Flame2 = GameObject.Find("Reactor2").GetComponent<ParticleSystem>();
         var main = Flame1.main;
@@ -42,15 +44,16 @@ public class SpaceShipControl : MonoBehaviour
       moveVertically();       
       moveForward();
 
-
     }
 
     void moveHorizontally(){
         float horizontalMove = Input.GetAxis("Horizontal") * 
               translationSpeed * Time.deltaTime;
+              
 
                 if(currentSpeed >= 0.1f){
-                        transform.position += transform.right * horizontalMove;
+                    transform.position += transform.right * horizontalMove*currentSpeed;
+
                 }
                 if(transform.position.x <=  MIN_X){
                     transform.position = new Vector3( MIN_X,transform.position.y, transform.position.z);
@@ -60,14 +63,49 @@ public class SpaceShipControl : MonoBehaviour
                 }
     }
 
+    void rotate(){
+
+      
+      
+      if(Input.GetAxis("Horizontal") == -1 ){
+
+        if(transform.localRotation.eulerAngles.z <= 10){
+          transform.Rotate(new Vector3(0, 0, -0.1f*Time.deltaTime));
+          //Debug.Log("inferior");
+        }else {
+          transform.Rotate(new Vector3(0, 0, 10));
+          //Debug.Log("superior");
+        }
+        
+      }
+
+      if(Input.GetAxis("Horizontal") == 1 ){
+ 
+          Debug.Log(transform.localRotation.eulerAngles.z );
+
+        if(transform.localRotation.eulerAngles.z >= -10){
+          //transform.Rotate(new Vector3(0, 0, 0.1f*Time.deltaTime));
+          //Debug.Log("superior");
+        }else {
+          //transform.Rotate(new Vector3(0, 0, -10));
+          Debug.Log("inferior");
+        }
+
+      }
+
+    
+    }
+
     void moveVertically(){
 
 
               float verticalMove = Input.GetAxis("Vertical") * translationSpeed * Time.deltaTime;
+              
 
-               if(currentSpeed >= 0.1f){
+               if(currentSpeed >= 0.1f ){
                      transform.position += 2*transform.up 
                     * verticalMove; 
+                    
                }     
                    
               
@@ -87,11 +125,20 @@ public class SpaceShipControl : MonoBehaviour
 
     void moveForward(){
              
-                if(Input.GetButton("Fire1") && SceneController.Instance.health > 0){
+                if(Input.GetButton("Fire1") && SceneController.Instance.health > 0 && SceneController.Instance.fuel >= 1){
                     currentSpeed += 0.1f * Time.deltaTime;
                     bAccelerate =true;
-                     changeFlameOnAcceleration(Flame1, bAccelerate);
+                    changeFlameOnAcceleration(Flame1, bAccelerate);
                      changeFlameOnAcceleration(Flame2, bAccelerate);
+                     
+                  if(SceneController.Instance.fuel >= 1){
+                        fuelConsumming(7);
+                  }else {
+                    Debug.Log("You ran out of fuel");
+                  }
+                    
+
+                     
                       if(currentSpeed > maxSpeed){
                         currentSpeed = maxSpeed;
                       }
@@ -125,12 +172,13 @@ public class SpaceShipControl : MonoBehaviour
       }
 
 
-   private void OnTriggerEnter(Collider other) {
+    private void OnTriggerEnter(Collider other) {
 
 
         
         if(SceneController.Instance.health > 0){
           SceneController.Instance.health -= 10;
+          //SceneController.Instance.health = 100; for testing only
         }
         if(SceneController.Instance.health == 50){
           SceneController.Instance.warning.gameObject.SetActive(true);
@@ -142,6 +190,12 @@ public class SpaceShipControl : MonoBehaviour
            SceneController.Instance.gameOver.gameObject.SetActive(true);
         }
     }
+
+
+    private void fuelConsumming(float c){
+      SceneController.Instance.fuel -= c *Time.deltaTime;
+}
+
 
 
 }

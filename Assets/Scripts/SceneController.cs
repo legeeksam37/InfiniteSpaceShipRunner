@@ -30,6 +30,13 @@ private Text healthText;
 public Text gameOver;
 [SerializeField]
 public Text warning;
+[SerializeField]
+private Image redBarFuel;
+[SerializeField]
+private Image blueBarFuel;
+[SerializeField]
+private Text fuelText;
+public float fuel;
 
 
 
@@ -59,7 +66,8 @@ private void Awake(){
         SpaceShip = GameObject.Find("SpaceShip");
         pos = SpaceShip.transform.position.z * groundSize/2 - 5f;
         
-         health =100;
+         health = 100;
+         fuel = 300;
         groundsOnScene = new GameObject[grounds.Length];
 
         for(int i = 0; i < grounds.Length; i++){
@@ -84,7 +92,8 @@ private void Awake(){
     {
         groundManagement();   
         healthManagement();
-        scoreManagement();
+        textManagement();
+        fuelManagement();
         
     }
 
@@ -111,12 +120,17 @@ private void Awake(){
         greenBar.rectTransform.sizeDelta = new Vector2(redBar.rectTransform.sizeDelta.x * (health/100f), redBar.rectTransform.sizeDelta.y);
     }
 
+    private void fuelManagement(){
+        blueBarFuel.rectTransform.sizeDelta = new Vector2(redBarFuel.rectTransform.sizeDelta.x * (fuel/300f), redBarFuel.rectTransform.sizeDelta.y);
+    }
+
     private void OnDestroy() {
         Instance = null;
     }
 
-    private void scoreManagement(){
+    private void textManagement(){
         healthText.text = health.ToString();
+        fuelText.text = fuel.ToString()+ " Liters";
     }
 
 }
